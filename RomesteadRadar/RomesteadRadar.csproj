@@ -1,0 +1,88 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    罗马拓荒录 (Romestead) BepInEx 6 (CoreCLR) 插件
+    编译产物：RomesteadRadar.dll → 放到 游戏目录\BepInEx\plugins\
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>RomesteadRadar</AssemblyName>
+    <RootNamespace>RomesteadRadar</RootNamespace>
+    <!-- 版本号只在仓库根目录的 version.txt 里维护，格式：游戏版本-Mod版本 -->
+    <RadarVersion>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)\..\version.txt').Trim())</RadarVersion>
+    <RadarGameVersion>$([System.String]::Copy('$(RadarVersion)').Split('-')[0])</RadarGameVersion>
+    <RadarModVersion>$([System.String]::Copy('$(RadarVersion)').Split('-')[1])</RadarModVersion>
+    <!-- BepInEx 只接受三段数字的 SemVer；把第四段游戏热修丢掉，Mod 版本放在 prerelease 位。 -->
+    <RadarPluginVersion>$([System.String]::Copy('$(RadarGameVersion)').Split('.')[0]).$([System.String]::Copy('$(RadarGameVersion)').Split('.')[1]).$([System.String]::Copy('$(RadarGameVersion)').Split('.')[2])-$(RadarModVersion)</RadarPluginVersion>
+    <Version>$(RadarPluginVersion)</Version>
+    <AssemblyVersion>$(RadarGameVersion)</AssemblyVersion>
+    <FileVersion>$(RadarGameVersion)</FileVersion>
+    <InformationalVersion>$(RadarVersion)</InformationalVersion>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- 游戏程序集/引擎程序集标记了预览特性与仅 Windows，屏蔽这两类分析器告警 -->
+    <NoWarn>$(NoWarn);CA2252;CA1416</NoWarn>
+
+    <!-- 游戏根目录（可按需修改） -->
+    <GameDir Condition="'$(GameDir)' == ''">E:\SteamLibrary\steamapps\common\romestead</GameDir>
+    <BepInExCore Condition="'$(BepInExCore)' == ''">$(GameDir)\BepInEx\core</BepInExCore>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BepInEx 6 CoreCLR 运行时自带的程序集：不复制到输出 -->
+    <Reference Include="BepInEx.Core">
+      <HintPath>$(BepInExCore)\BepInEx.Core.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BepInEx.NET.Common">
+      <HintPath>$(BepInExCore)\BepInEx.NET.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExCore)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!-- 游戏程序集：同样不复制 -->
+    <Reference Include="Romestead">
+      <HintPath>$(GameDir)\Romestead.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Shared">
+      <HintPath>$(GameDir)\Shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="CandideServer">
+      <HintPath>$(GameDir)\CandideServer.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="CandideCreator.Shared">
+      <HintPath>$(GameDir)\CandideCreator.Shared.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>$(GameDir)\MonoGame.Framework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="FontStashSharp.MonoGame">
+      <HintPath>$(GameDir)\FontStashSharp.MonoGame.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- 从 version.txt 生成 PluginVersion 常量，供 BepInPlugin 特性使用 -->
+  <Target Name="GeneratePluginVersion" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <_PluginVersionFile>$(IntermediateOutputPath)PluginVersion.g.cs</_PluginVersionFile>
+      <_PluginVersionCode>namespace RomesteadRadar%3B internal static class PluginVersion { internal const string Version = &quot;$(RadarPluginVersion)&quot;%3B internal const string DisplayVersion = &quot;$(RadarVersion)&quot;%3B }</_PluginVersionCode>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(_PluginVersionFile)" Lines="$(_PluginVersionCode)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Compile Include="$(_PluginVersionFile)" />
+    </ItemGroup>
+  </Target>
+
+</Project>

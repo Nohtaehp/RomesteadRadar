@@ -1,0 +1,24 @@
+# 构建与打包产物
+/out/
+/dist/
+
+# .NET 中间文件
+**/bin/
+**/obj/
+
+# 本地文档（不纳入 git）
+/docs/
+
+# IDE / 用户文件
+.vs/
+.idea/
+*.user
+
+# 截图与临时文件
+/.screenshots/
+*.tmp
+*.log
+
+# 操作系统文件
+Thumbs.db
+.DS_Store
