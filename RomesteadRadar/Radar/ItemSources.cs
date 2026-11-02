@@ -196,9 +196,10 @@ namespace RomesteadRadar
                 AddEntity("food:berry:white_currant", BerryPatchGuids[i], true);
             }
 
-            // 芦荟。
-            AddEntity("material:aloe_vera", EntityIds.AloeBush, true);
-            AddEntity("seed:aloe_vera", EntityIds.AloeBush, true);
+            // 芦荟。野外的芦荟是可直接攻击采集的灌木实体（只有 Health/DropTable，没有 Interactable 组件），
+            // 不能按“是否可交互”过滤，否则永远找不到。
+            AddEntity("material:aloe_vera", EntityIds.AloeBush, false);
+            AddEntity("seed:aloe_vera", EntityIds.AloeBush, false);
 
             // 矿物。
             AddEntity("material:flint_shard", EntityIds.FlintEntityGuid, false);
